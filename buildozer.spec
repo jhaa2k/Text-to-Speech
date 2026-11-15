@@ -15,6 +15,7 @@ android.ndk = 25b
 android.archs = arm64-v8a
 android.accept_sdk_license = True
 android.private_storage = True
+p4a.branch = master
 [buildozer]
 log_level = 2
 warn_on_root = 1
