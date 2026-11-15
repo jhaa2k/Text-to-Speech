@@ -47,8 +47,8 @@ class VoiceEngine:
             def onStart(inner,u):pass
             @java_method("(Ljava/lang/String;)V")
             def onDone(inner,u):inner.event.set()
-            @java_method("(Ljava/lang/String;Ljava/lang/String;)V")
-            def onError(inner,u,e):inner.error=str(e);inner.event.set()
+            @java_method("(Ljava/lang/String;I)V")
+            def onError(inner,u,code):inner.error="Android TTS error "+str(code);inner.event.set()
             @java_method("(Ljava/lang/String;I)V")
             def onStop(inner,u,c):inner.event.set()
         listener=Progress(); self._tts.setOnUtteranceProgressListener(listener)
@@ -64,6 +64,22 @@ class VoiceEngine:
         e.setProperty("rate",int(190*float(rate)));e.setProperty("volume",float(volume))
         e.save_to_file(text,str(path));e.runAndWait();e.stop()
         if not path.exists() or path.stat().st_size<100:raise RuntimeError("No audio produced; check installed system voices.")
+    def publish_export(self,path):
+        if not self.android:return path
+        from jnius import autoclass
+        Build=autoclass("android.os.Build")
+        if Build.VERSION.SDK_INT<29:return path
+        activity=autoclass("org.kivy.android.PythonActivity").mActivity
+        resolver=activity.getContentResolver(); MediaStore=autoclass("android.provider.MediaStore"); Values=autoclass("android.content.ContentValues")
+        values=Values(); values.put("DISPLAY_NAME",Path(path).name); values.put("MIME_TYPE","audio/wav")
+        values.put("RELATIVE_PATH","Download/VOX Studio"); values.put("IS_PENDING",1)
+        uri=resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI,values)
+        if uri is None:raise RuntimeError("Could not create file in Android Downloads.")
+        stream=resolver.openOutputStream(uri)
+        try:stream.write(bytearray(Path(path).read_bytes()))
+        finally:stream.close()
+        done=Values(); done.put("IS_PENDING",0); resolver.update(uri,done,None,None)
+        return "Downloads/VOX Studio/"+Path(path).name
     def play(self,path):
         if self.android:
             from jnius import autoclass
