@@ -17,13 +17,15 @@ jobs:
           path: |
             .buildozer
             ~/.gradle/caches
-          key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
+          key: buildozer-clean-${{ runner.os }}-${{ github.sha }}
       - name: Install build dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev
           python -m pip install --upgrade pip
           pip install buildozer cython==0.29.34
+      - name: Clean stale Android build state
+        run: buildozer android clean || true
       - name: Build debug APK
         run: buildozer -v android debug
       - name: Upload APK
