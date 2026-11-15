@@ -5,7 +5,7 @@ package.domain = com.jhaa2k
 source.dir = .
 source.include_exts = py,json,png,jpg,kv,ttf
 version = 0.1.0
-requirements = python3,kivy==2.3.2,pyjnius
+requirements = python3==3.12.10,hostpython3==3.12.10,kivy==2.3.2,pyjnius
 orientation = portrait
 fullscreen = 0
 android.permissions = INTERNET
