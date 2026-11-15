@@ -85,6 +85,7 @@ class VoxStudio(App):
             try:
                 path=self.engine.synthesize(*args)
                 if preview:self.engine.play(path)
+                else:path=self.engine.publish_export(path)
                 Clock.schedule_once(lambda *_:self.complete(path,preview),0)
             except Exception as e:Clock.schedule_once(lambda *_:setattr(self.status,"text","Error: "+str(e)),0)
         threading.Thread(target=run,daemon=True).start()
